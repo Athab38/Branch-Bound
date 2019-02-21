@@ -125,7 +125,7 @@ public class Matrice {
 		int min = Matrice.maxval;
 		// for each line, search for the minimum & substract on each column
 		for (int j = 0; j < this.nbL; j++) {
-			// if [0][j] is null, the wole column is
+			// if [0][j] is null, the whole column is
 			if (this.matrice[0][j] != null) {
 				// set column's values
 				min = this.rechercheMin(this.extraireColonne(j));
