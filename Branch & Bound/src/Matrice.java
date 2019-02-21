@@ -221,7 +221,8 @@ public class Matrice {
 		}
 	}
 	
-	public void setCaseMatrice(int ligne, int colonne) {
+	// set a case @ maxval value (usually to avoid too fast loop
+	public void setMaxvalCaseMatrice(int ligne, int colonne) {
 		this.matrice[ligne][colonne] = Matrice.maxval;
 	}
 }
