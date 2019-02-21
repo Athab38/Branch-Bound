@@ -35,8 +35,8 @@ public class Main {
 		System.out.println(mx.matricetoString());
 		
 		
-		// eliminate mirror path		
-		mx.setCaseMatrice(regretMax[1], regretMax[0]);
+		// eliminate loop path		
+		mx.setMaxvalCaseMatrice(regretMax[1], regretMax[0]);
 		System.out.println(mx.matricetoString());
 		
 		
