@@ -1,8 +1,8 @@
 
 public class Matrice {
 
-	int[][] matrice;
-	int[][] regret; 
+	Integer[][] matrice;
+	Integer[][] regret; 
 	public static final int maxval = 9999;
 	// nbC is useless because we'll always have a square matrix !!
 	private int nbL = 6;
@@ -10,8 +10,8 @@ public class Matrice {
 	// create test matrix
 	public Matrice(int taille) {
 		this.nbL = taille;
-		matrice = new int[this.nbL][this.nbL];
-		regret = new int[this.nbL][this.nbL];
+		matrice = new Integer[this.nbL][this.nbL];
+		regret = new Integer[this.nbL][this.nbL];
 		// set max values for cycles
 		for (int i = 0; i < this.nbL; i++) {
 			matrice[i][i] = maxval;
@@ -62,17 +62,37 @@ public class Matrice {
 		}
 		
 	}
-	
+
 	// quick & dirty code but it's just a test sample D:
-	@Override
-	public String toString() {
+	public String matricetoString() {
 		String ch = "";
 		// add matrix's values to ch
 		for (int i = 0; i < this.nbL; i ++) {
-			for (int j = 0; j < this.nbL; j++) {
-				ch += matrice[i][j] + " ";
+			if (this.matrice[i] != null) {
+				for (int j = 0; j < this.nbL; j++) {
+					if (this.matrice[i][j] != null) {
+						ch += this.matrice[i][j] + " ";
+					}
+				}
+				ch += "\n";
 			}
-			ch += "\n";
+		}
+		return ch;
+	}
+	
+	// quick & dirty code but it's just a test sample D:
+	public String regrettoString() {
+		String ch = "";
+		// add matrix's values to ch
+		for (int i = 0; i < this.nbL; i ++) {
+				if (this.regret[i] != null) {
+				for (int j = 0; j < this.nbL; j++) {
+					if (this.regret[i][j] != null) {
+						ch += this.regret[i][j] + " ";
+					}
+				}
+				ch += "\n";
+			}
 		}
 		return ch;
 	}
@@ -84,13 +104,15 @@ public class Matrice {
 		int min = Matrice.maxval;
 		// for each line, search for the minimum & substract on each column
 		for (int i = 0; i < this.nbL; i++) {
-			min = rechercheMin(this.matrice[i]);
-			for (int j = 0; j < this.nbL; j++) {
-				// don't touch at maxval value
-				if (i != j)
-					this.matrice[i][j] -= min;
+			if (this.matrice[i] != null) {
+				min = rechercheMin(this.matrice[i]);
+				for (int j = 0; j < this.nbL; j++) {
+					// don't touch at maxval value
+					if (this.matrice[i][j] != null && i != j)
+						this.matrice[i][j] -= min;
+				}
+				total += min;
 			}
-			total += min;
 		}
 		return total;
 	}
@@ -103,32 +125,37 @@ public class Matrice {
 		int min = Matrice.maxval;
 		// for each line, search for the minimum & substract on each column
 		for (int j = 0; j < this.nbL; j++) {
-			// set column's values
-			min = this.rechercheMin(this.extraireColonne(j));
-			for (int i = 0; i < this.nbL; i++) {
-				// don't touch at maxval value
-				if (i != j)
-					this.matrice[i][j] -= min;
+			// if [0][j] is null, the wole column is
+			if (this.matrice[0][j] != null) {
+				// set column's values
+				min = this.rechercheMin(this.extraireColonne(j));
+				for (int i = 0; i < this.nbL; i++) {
+					// don't touch at maxval value
+					if (this.matrice[i] != null && i != j)
+						this.matrice[i][j] -= min;
+				}
+				total += min;
 			}
-			total += min;
 		}
 		return total;
 	}
 	
 	// create a tab, with all values from a column
-	private int[] extraireColonne (int numCol) {
-		int[] column = new int[this.nbL];
+	private Integer[] extraireColonne (int numCol) {
+		Integer[] column = new Integer[this.nbL];
 		for (int i = 0; i < this.nbL; i++) {
-			column[i] = this.matrice[i][numCol];
+			if (this.matrice[i] != null) {
+				column[i] = this.matrice[i][numCol];
+			}
 		}
 		return column;
 	}
 	
 	// basic minimum search 
-	private int rechercheMin(int[] tab) {
+	private int rechercheMin(Integer[] tab) {
 		int min = Matrice.maxval;
 		for (int i = 0; i < this.nbL; i++) {
-			if (tab[i] < min)
+			if (tab[i] != null && tab[i] < min)
 				min = tab[i];
 		}
 		return min;
@@ -142,13 +169,59 @@ public class Matrice {
 		for (int i = 0; i < this.nbL; i++) {
 			for (int j = 0; j < this.nbL; j++) {
 				if (this.matrice[i][j] == 0) {
-					// retrieve minimum on line & column
-					minLigne = this.rechercheMin(this.matrice[i]);
-					minColonne = this.rechercheMin(extraireColonne(j));
+					// retrieve minimum on line & column (we have to skip the case containing the 0)
+					minLigne = this.rechercheMinSkip(this.matrice[i], j);
+					minColonne = this.rechercheMinSkip(extraireColonne(j), i);
 					// update regret's value in corresponding case
 					this.regret[i][j] = minLigne + minColonne;
 				}
 			}
 		}
+	}
+	
+	// basic minimum search with skip, to avoid to take in account the 0 itself
+	private int rechercheMinSkip(Integer[] tab, int ind) {
+		int min = Matrice.maxval;
+		for (int i = 0; i < this.nbL; i++) {
+			if (i != ind && tab[i] < min)
+				min = tab[i];
+		}
+		return min;
+	}
+	
+	// retrieve maximum regret 
+	public int[] rechercheRegretMax() {
+		// max[0] -> line / max[1] -> column / max[2] -> value /
+		int[] max = new int [3];
+		max[2] = -1;
+		for (int i = 0; i < this.nbL; i++) {
+			for (int j = 0; j < this.nbL; j++) {
+				if (this.regret[i][j] > max[2]) {
+					max[2] = this.regret[i][j];
+					max[0] = i;
+					max[1] = j;
+				}
+			}
+		}
+		return max;
+	}
+	// set line @ null
+	public void supprimerLigne(int ligne) {
+		this.matrice[ligne] = null;
+		this.regret[ligne] = null;
+	}
+	
+	// set column @ null 
+	public void supprimerColonne(int colonne) {
+		for (int i = 0; i < this.nbL; i++) {
+			if (this.matrice[i] != null) {
+				this.matrice[i][colonne] = null;
+				this.regret[i][colonne] = null;
+			}
+		}
+	}
+	
+	public void setCaseMatrice(int ligne, int colonne) {
+		this.matrice[ligne][colonne] = Matrice.maxval;
 	}
 }
